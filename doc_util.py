@@ -44,8 +44,8 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str):
 
 # 处理文档中的图片（翻转，缩放，水印）
 def img_process(img_path, save_path=None, watermark_text: str = None):
-    max_w = 600
-    max_h = 700
+    max_w = 1200
+    max_h = 1500
     if not os.path.exists(img_path):
         return None
 
