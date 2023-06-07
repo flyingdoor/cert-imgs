@@ -5,7 +5,11 @@ import numpy as np
 from docx import Document
 from cert_imgs_db import CertImagesDB
 from docx.shared import Cm
+from docx.shared import Pt #磅数
+from docx.oxml.ns import qn #中文格式
 from docx.enum.text import WD_BREAK
+from docx.shared import RGBColor#设置字体
+
 from PIL import Image, ImageDraw, ImageFont
 
 cert_imgs_path = ''
@@ -21,18 +25,22 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str):
     for record in records:
         name = record['name']
         imgs = record['images']
-        document.add_heading(name, level=3)
+        title = document.add_heading('', level=3)
+        title_run = title.add_run(name)
+        title_run.font.name = '宋体'
+        title_run.element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
+        title_run.font.color.rgb = RGBColor(0, 0, 0)
+        title_run.font.size = Pt(10)
+        title_run.font.bold = True
+
         try:
             for index, img in enumerate(imgs):
-                print(os.getcwd())
                 img_path = os.path.join(os.getcwd(), 'data', 'cert-image', img[len('/cert-imgs/'):])
-                print(img_path)
                 if not os.path.exists(img_path):
                     document.add_paragraph('图片不存在:' + img)
                     continue
                 img_out_path = os.path.join(out_dir, 'img-{}-{}.png'.format(name, index))
                 img = img_process(img_path, save_path=img_out_path, watermark_text=watermark_text)
-                # cv2.imwrite(img_out_path, img)
                 document.add_picture(img_out_path, width=Cm(15))
         except Exception as e:
             document.add_paragraph('插入失败:' + name)
