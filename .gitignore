@@ -3,3 +3,4 @@ web/static/upload
 data/cert-image
 data/db.json
 web/docs
+__pycache__
