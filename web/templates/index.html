@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>资质文档导出</title>
+    <link rel="shortcut icon" href="#"/>
+
+    <link href="{{static_url('lib/bootstrap/bootstrap.min.css')}}" rel="stylesheet">
+    <script src="{{static_url('lib/bootstrap/bootstrap.bundle.min.js')}}"></script>
+
+
+    <script src="{{static_url('lib/vue/vue.js')}}"></script>
+
+    <!-- 引入样式 https://unpkg.com/element-ui/lib/theme-chalk/index.css -->
+    <link rel="stylesheet" href="{{static_url('lib/element-ui/theme-chalk/index.css')}}">
+    <!-- https://unpkg.com/element-ui/lib/index.js  -->
+    <script src="{{static_url('lib/element-ui/index.js')}}"></script>
+</head>
+<body>
+
+
+<el-page-header @back="goBack" content="详情页面">
+<!--    fff-->
+</el-page-header>
+<!--</el-container>-->
+<div>
+<!--    <el-container>-->
+<!--        <el-header>Header</el-header>-->
+<!--        <el-main>Main</el-main>-->
+<!--    </el-container>-->
+<!--    <el-page-header content="详情页面">-->
+<!--&lt;!&ndash;        sssss&ndash;&gt;-->
+<!--    </el-page-header>-->
+</div>
+
+<!--<h1>资质文档导出</h1>-->
+<div id="app">
+    <!-- 表达式 -->
+    <!--    <h1>${message}</h1>-->
+    <div style="margin-top: 20px; margin-right: 50px; margin-bottom:10px; text-align:right">
+        <el-button @click="query">刷新</el-button>
+        <el-button @click="visible = true">添加</el-button>
+    </div>
+
+
+    <!--    <button @click="query">查询</button>-->
+    <!--    <button @click="add">添加</button>-->
+    <div class="table-container">
+
+        <template>
+            <el-table
+                    ref="multipleTable"
+                    :data="tableData"
+                    tooltip-effect="dark"
+                    border
+                    style="width: 100%;"
+                    @selection-change="handleSelectionChange">
+                <el-table-column
+                        type="selection"
+                        width="55">
+                </el-table-column>
+
+                <el-table-column
+                        prop="name"
+                        label="名称"
+                        width="120">
+                </el-table-column>
+                <el-table-column
+                        label="类别"
+                        width="120">
+                    <template slot-scope="scope">${ scope.row.category }</template>
+                </el-table-column>
+                <el-table-column
+                        prop="images"
+                        label="图片"
+                        show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <div v-for="url in scope.row.images">
+                            <el-image
+                                    style="width: 100px; height: 100px;float:left; padding: 10px    10px;"
+                                    :src="url"
+                                    :preview-src-list="scope.row.images">
+                            </el-image>
+                        </div>
+
+                    </template>
+                </el-table-column>
+
+                <el-table-column
+                        fixed="right"
+                        label="操作"
+                        width="100">
+                    <template slot-scope="scope">
+
+                        <el-popconfirm
+                                confirm-button-text='是的'
+                                cancel-button-text='算了'
+                                icon="el-icon-info"
+                                icon-color="red"
+                                @confirm="handleDelete(scope.$index, scope.row)"
+                                title="确定删除吗？"
+                        >
+                            <el-button slot="reference" type="text" size="small">删除</el-button>
+                        </el-popconfirm>
+
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div style="margin-top: 20px; margin-right: 50px;text-align:right">
+                <!--                <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>-->
+                <el-button @click="toggleSelection()">取消选择</el-button>
+<!--                <el-button @click="get_docx()">导出</el-button>-->
+                <el-button @click="exportFormShowFlag = true">导出</el-button>
+
+            </div>
+        </template>
+
+    </div>
+
+    <!-- 弹窗： 新增资质 -->
+    <template>
+        <el-dialog :visible.sync="visible" title="新增资质证件">
+            <p>新增资质证件</p>
+            <el-form ref="form" :model="form" label-width="80px">
+                <el-form-item label="证件名称">
+                    <el-input v-model="form.name" ch="certName"></el-input>
+                </el-form-item>
+                <el-form-item label="证件分类">
+                    <el-input v-model="form.category" ch="category"></el-input>
+                </el-form-item>
+                <el-form-item label="证件照片">
+                    <el-upload
+                            class="upload-demo"
+                            drag
+                            action="/api/upload-cert-img"
+                            :on-success="handleUploadSuccess"
+                            :file-list="fileList"
+                            list-type="picture"
+                            multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em>。</div>
+                        <div class="el-upload__tip" slot="tip">只能上传jpg/png文件。</div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">立即创建</el-button>
+                    <el-button @click="visible = false">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </template>
+
+    <!-- 抽屉：导出word -->
+    <template>
+        <el-drawer
+                title="导出资质证书"
+                :before-close="exportFormCancel"
+                :visible.sync="exportFormShowFlag"
+                direction="ltr"
+                custom-class="demo-drawer"
+                ref="drawer"
+        >
+            <div class="demo-drawer__content">
+                <el-form :model="exportForm">
+                    <el-form-item label="水印" :label-width="exportFormLabelWidth">
+                        <el-input v-model="exportForm.watermarkText" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div class="demo-drawer__footer">
+                    <el-button @click="exportFormCancel">取 消</el-button>
+<!--                    <el-button type="primary" @click="$refs.drawer.closeDrawer()" :loading="exportFormLoading">${-->
+<!--                        exportFormLoading ? '提交中...' : '确 定' }-->
+<!--                    </el-button>-->
+                    <el-button @click="export_doc()">导出文档</el-button>
+                </div>
+            </div>
+        </el-drawer>
+    </template>
+
+    <!-- 弹窗： 导出结果 -->
+    <template>
+        <el-dialog :visible.sync="show_export_result">
+            <el-result v-if="export_result.success" icon="success" title="成功提示"
+                       subTitle="生成成功，下载文件。">
+                <template slot="extra">
+                    <!--                            <a :href="">下载</a>-->
+                    <!--                            ${ export_result.msg }-->
+                    <div><a :href="export_result.data" style="margin-bottom: 10px;">点我下载: ${
+                        export_result.data }</a></div>
+                    <el-button @click="show_export_result = false" type="primary" size="medium">返回</el-button>
+                </template>
+            </el-result>
+            <el-result v-else="export_result.success" icon="fail" title="失败提示" subTitle="生成失败。">
+                <template slot="extra">
+                    <!--                            <a :href="">下载</a>-->
+                    <div> ${ export_result.msg }</div>
+                    <el-button @click="show_export_result = false" type="primary" size="medium">返回</el-button>
+                </template>
+            </el-result>
+        </el-dialog>
+    </template>
+</div>
+
+
+<script src="{{static_url('app/app.js')}}"></script>
+
+
+</body>
+</html>
