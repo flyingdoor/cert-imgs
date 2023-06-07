@@ -101,7 +101,7 @@ class GenDocHandler(tornado.web.RequestHandler):
 
         # print(records)
         watermark_text = param['watermarkText'] if 'watermarkText' in param else None
-        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        now = time.strftime("%Y-%m-%d %H-%M-%S")
         out_dir = os.path.join('web', 'docs', now)
         succ, msg = False, ''
         try:
@@ -116,7 +116,7 @@ class GenDocHandler(tornado.web.RequestHandler):
                 'success': succ,
                 'msg': msg,
                 'path': path,
-                'data': None if path is None else ('/cert-docs' + path.split('web/docs')[1])
+                'data': None if path is None else ('/cert-docs' + path.split(os.path.join('web', 'docs'))[1][1])
             }))
         # self.render("500.html", msg="后台有错")  # 模板参数传递
 
