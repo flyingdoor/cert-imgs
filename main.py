@@ -116,7 +116,7 @@ class GenDocHandler(tornado.web.RequestHandler):
                 'success': succ,
                 'msg': msg,
                 'path': path,
-                'data': None if path is None else ('/cert-docs' + path.split(os.path.join('web', 'docs'))[1][1])
+                'data': None if path is None else ('/cert-docs' + path.split(os.path.join('web', 'docs'))[1])
             }))
         # self.render("500.html", msg="后台有错")  # 模板参数传递
 
