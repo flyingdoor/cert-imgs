@@ -12,7 +12,7 @@ class CertImagesDB(object):
     def add(self, record):
         succ, msg, db_json = self.__load_db()
         if not succ:
-            return succ, msg
+            return succ, msg,None
         if db_json['data'] is None:
             db_json['data'] = []
         new_data = {
