@@ -15,7 +15,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         db = CertImagesDB()
         succ, msg, data = db.query(None);
-        print(data)
+        # print(data)
         self.render("index.html", succ=succ, msg=msg, data=data, len=len)
 
 
@@ -24,7 +24,7 @@ class QueryHandler(tornado.web.RequestHandler):
     def get(self):
         db = CertImagesDB()
         succ, msg, data = db.query(None);
-        print(data)
+        # print(data)
         self.write(json.dumps({
             'success': succ,
             'msg': msg,

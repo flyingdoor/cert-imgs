@@ -64,7 +64,11 @@ new Vue({
                 })
         },
         onSubmit() {
-            this.form.fileList = this.fileList
+            files=[]
+            for (var i = 0; i < this.fileList.length; i++) {
+                files.push(this.fileList[i].response)
+            }
+            this.form.fileList = files
             console.log(this.form)
 
             fetch('/api/add', {
@@ -87,9 +91,15 @@ new Vue({
 //            console.log(this.fileList)
         },
         handleUploadSuccess(response, file, fileList) {
-            console.log(response)
-            console.log(fileList)
-            this.fileList.push(response)
+//            console.log(response)
+//            console.log(fileList)
+//            this.fileList.push(response)
+//            console.log('----')
+//            console.log(fileList)
+            console.log(this.fileList)
+//            console.log('----')
+            this.fileList = fileList
+
         },
         handleRemove(file, fileList) {
             console.log(file, fileList);
