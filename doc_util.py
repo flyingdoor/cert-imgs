@@ -9,13 +9,13 @@ from docx.shared import Pt #磅数
 from docx.oxml.ns import qn #中文格式
 from docx.enum.text import WD_BREAK
 from docx.shared import RGBColor#设置字体
-
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from PIL import Image, ImageDraw, ImageFont
 
 cert_imgs_path = ''
 
 
-def cert_img_to_doc(records: list, out_dir: str, watermark_text: str):
+def cert_img_to_doc(records: list, out_dir: str, watermark_text: str, need_title=True):
     if not os.path.exists(out_dir) or not os.path.isdir(out_dir):
         os.makedirs(out_dir, exist_ok=True)
     document = Document()
@@ -25,13 +25,14 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str):
     for record in records:
         name = record['name']
         imgs = record['images']
-        title = document.add_heading('', level=3)
-        title_run = title.add_run(name)
-        title_run.font.name = '宋体'
-        title_run.element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
-        title_run.font.color.rgb = RGBColor(0, 0, 0)
-        title_run.font.size = Pt(10)
-        title_run.font.bold = True
+        if need_title :
+            title = document.add_heading('', level=3)
+            title_run = title.add_run(name)
+            title_run.font.name = '宋体'
+            title_run.element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
+            title_run.font.color.rgb = RGBColor(0, 0, 0)
+            title_run.font.size = Pt(10)
+            title_run.font.bold = True
 
         try:
             for index, img in enumerate(imgs):
@@ -41,7 +42,17 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str):
                     continue
                 img_out_path = os.path.join(out_dir, 'img-{}-{}.png'.format(name, index))
                 img = img_process(img_path, save_path=img_out_path, watermark_text=watermark_text)
-                document.add_picture(img_out_path, width=Cm(15))
+                w,h = img.size[:2]
+                paragraph = document.add_paragraph()
+                paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                run = paragraph.add_run("")
+                # dpi: 96
+                if w < 560:
+                    run.add_picture(img_out_path)
+                else:
+                    run.add_picture(img_out_path, width=Cm(15))
+                # # doc_pic.width=Cm(10)
+
         except Exception as e:
             document.add_paragraph('插入失败:' + name)
             print(e)
@@ -52,8 +63,8 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str):
 
 # 处理文档中的图片（翻转，缩放，水印）
 def img_process(img_path, save_path=None, watermark_text: str = None):
-    max_w = 1200
-    max_h = 1500
+    max_w = 1500
+    max_h = 2000
     if not os.path.exists(img_path):
         return None
 
@@ -107,7 +118,7 @@ def gen_text_watermark(text='logo', text_size=10, text_color=(100, 100, 100), bg
     draw = ImageDraw.Draw(img)
     # 字体的格式
     font_style = ImageFont.truetype(
-        "data/tcc/simsun.ttc", text_size, encoding="utf-8")
+        "res/tcc/simsun.ttc", text_size, encoding="utf-8")
     # 绘制文本
     draw.text(xy=(0, 0), text=text, fill=text_color, font=font_style)
     img = img.rotate(angle=45, expand=1, fillcolor=bg_color)

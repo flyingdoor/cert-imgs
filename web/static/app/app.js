@@ -23,6 +23,7 @@ new Vue({
         exportFormLoading: false,
         exportFormLabelWidth:'80px',
         exportForm: {
+            needTitle: true
         }
     },
 
@@ -50,6 +51,7 @@ new Vue({
             data = {
                 'records': this.multipleSelection,
                 'watermarkText': this.exportForm.watermarkText,
+                'needTitle': this.exportForm.needTitle,
             }
             console.log(this.checkedRows)
             console.log(data)

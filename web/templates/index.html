@@ -165,6 +165,14 @@
                 <el-form :model="exportForm">
                     <el-form-item label="水印" :label-width="exportFormLabelWidth">
                         <el-input v-model="exportForm.watermarkText" autocomplete="off"></el-input>
+<!--                        <el-checkbox v-model="hideTitle" border size="medium">隐藏标题</el-checkbox>-->
+                        <el-switch
+                          v-model="exportForm.needTitle"
+                          active-text="带标题"
+                          inactive-text="无标题"
+                          active-color="#13ce66"
+                          inactive-color="#ff4949">
+                        </el-switch>
                     </el-form-item>
                 </el-form>
                 <div class="demo-drawer__footer">
