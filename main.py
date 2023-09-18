@@ -101,13 +101,17 @@ class GenDocHandler(tornado.web.RequestHandler):
 
         # print(records)
         watermark_text = param['watermarkText'] if 'watermarkText' in param else None
+        watermark_text_size = param['watermarkTextSize'] if 'watermarkTextSize' in param else None
         need_title = bool(param['needTitle']) if 'needTitle' in param else True
         now = time.strftime("%Y-%m-%d %H-%M-%S")
         out_dir = os.path.join('web', 'docs', now)
         succ, msg = False, ''
         try:
-            doc = cert_img_to_doc(records=records, out_dir=out_dir,
-                                  watermark_text=watermark_text, need_title=need_title)
+            doc = cert_img_to_doc(records=records,
+                                  out_dir=out_dir,
+                                  watermark_text=watermark_text,
+                                  watermark_text_size=watermark_text_size,
+                                  need_title=need_title)
             path = save_doc(doc, os.path.join(out_dir, 'export.docx'))
             succ, msg = True, '导出成功'
         except Exception as e:
