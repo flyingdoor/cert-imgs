@@ -87,7 +87,10 @@ class CertImagesDB(object):
 
     def __load_db(self) -> (bool, str, dict):
         if not os.path.exists(self.db_json_path):
-            return False, '索引文件不存在', None
+            # json.dump({"data":[]}, self.db_json_path, indent=4)
+            self.__save_db({"data":[]}, force=True)
+            print(f'索引文件不存在,新创建。')
+            # return False, '索引文件不存在', None
         with open(self.db_json_path, 'r') as db_json_file:
             try:
                 db_json = json.load(db_json_file)
@@ -96,8 +99,8 @@ class CertImagesDB(object):
                 print(e)
                 return False, '索引文件格式不正确', None
 
-    def __save_db(self, db_json) -> (bool, str):
-        if not os.path.exists(self.db_json_path):
+    def __save_db(self, db_json, force=False) -> (bool, str):
+        if not os.path.exists(self.db_json_path) and not force:
             return False, '索引文件不存在'
         with open(self.db_json_path, 'w') as db_json_file:
             try:
