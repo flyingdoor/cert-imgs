@@ -15,12 +15,14 @@ from PIL import Image, ImageDraw, ImageFont
 cert_imgs_path = ''
 
 
-def cert_img_to_doc(records: list, out_dir: str, watermark_text: str, need_title=True):
+def cert_img_to_doc(records: list, out_dir: str, watermark_text: str, need_title=True, watermark_text_size=30):
     if not os.path.exists(out_dir) or not os.path.isdir(out_dir):
         os.makedirs(out_dir, exist_ok=True)
     document = Document()
     if list is None and len(records) > 0:
-        return document;
+        return document
+    if not watermark_text_size:
+        watermark_text_size = 30
     # document.add_heading('资质证书列表')
     for record in records:
         name = record['name']
@@ -41,7 +43,7 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str, need_title
                     document.add_paragraph('图片不存在:' + img)
                     continue
                 img_out_path = os.path.join(out_dir, 'img-{}-{}.png'.format(name, index))
-                img = img_process(img_path, save_path=img_out_path, watermark_text=watermark_text)
+                img = img_process(img_path, save_path=img_out_path, watermark_text=watermark_text, watermark_text_size=watermark_text_size)
                 w,h = img.size[:2]
                 paragraph = document.add_paragraph()
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -62,7 +64,7 @@ def cert_img_to_doc(records: list, out_dir: str, watermark_text: str, need_title
 
 
 # 处理文档中的图片（翻转，缩放，水印）
-def img_process(img_path, save_path=None, watermark_text: str = None):
+def img_process(img_path, save_path=None, watermark_text: str = None, watermark_text_size=30):
     max_w = 1500
     max_h = 2000
     if not os.path.exists(img_path):
@@ -91,7 +93,7 @@ def img_process(img_path, save_path=None, watermark_text: str = None):
     # 加水印
     if watermark_text is not None and len(watermark_text.strip()) > 0:
         img = img.convert('RGBA')
-        logo = gen_text_watermark(text=watermark_text, text_size=30, text_color=(100, 100, 100))
+        logo = gen_text_watermark(text=watermark_text, text_size=watermark_text_size, text_color=(100, 100, 100))
         # img.paste(logo, (0, 0), logo.split()[3])
         logo_full = Image.new(mode='RGBA', size=img.size)
 
