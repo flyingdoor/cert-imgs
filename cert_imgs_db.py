@@ -104,7 +104,7 @@ class CertImagesDB(object):
             return False, '索引文件不存在'
         with open(self.db_json_path, 'w') as db_json_file:
             try:
-                json.dump(db_json, db_json_file, indent=4)
+                json.dump(db_json, db_json_file, indent=4, ensure_ascii=False)
                 return True, '保存成功'
             except Exception as e:
                 print(e)
